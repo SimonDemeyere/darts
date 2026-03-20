@@ -1,0 +1,1279 @@
+/* ============================================
+   DARTS SCORER — STYLES
+   ============================================ */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+    --bg: #0d1b2a;
+    --surface: #152233;
+    --surface2: #1d2e42;
+    --surface3: #253650;
+    --accent: #00d4aa;
+    --accent-dark: #00a884;
+    --accent-glow: rgba(0, 212, 170, 0.15);
+    --red: #e05252;
+    --red-dim: rgba(224, 82, 82, 0.15);
+    --yellow: #f4c430;
+    --text: #e8f0f8;
+    --text2: #7a90a8;
+    --text3: #4a6278;
+    --border: #1e3248;
+    --border2: #253a52;
+    --p0: #00d4aa;
+    --p1: #4da6ff;
+    --p2: #ff7c43;
+    --p3: #c77dff;
+    --radius: 12px;
+    --radius-sm: 8px;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+#app {
+    max-width: 480px;
+    margin: 0 auto;
+    height: 100%;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ============================================
+   HOME / SETUP SCREEN
+   ============================================ */
+.home-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 0 24px;
+    overflow-y: auto;
+}
+
+.home-header {
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+    padding: 32px 20px 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+}
+
+.home-header .logo {
+    font-size: 40px;
+    margin-bottom: 8px;
+}
+
+.home-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+}
+
+.home-header p {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 4px;
+}
+
+.home-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 10px;
+}
+
+.tab-group {
+    display: flex;
+    gap: 8px;
+    background: var(--surface);
+    padding: 4px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tab-btn.active {
+    background: var(--accent);
+    color: #000;
+    box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
+}
+
+.option-group {
+    display: flex;
+    gap: 8px;
+}
+
+.option-btn {
+    flex: 1;
+    padding: 10px 8px;
+    border: 1.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+}
+
+.option-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+}
+
+/* Players */
+.players-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.player-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+}
+
+.player-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.player-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 500;
+    outline: none;
+    min-width: 0;
+}
+
+.player-input::placeholder {
+    color: var(--text3);
+}
+
+.remove-player-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: rgba(224, 82, 82, 0.15);
+    color: var(--red);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.remove-player-btn:hover {
+    background: rgba(224, 82, 82, 0.25);
+}
+
+.add-player-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+}
+
+.add-player-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.start-btn {
+    padding: 16px;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    color: #000;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 16px rgba(0, 212, 170, 0.35);
+    letter-spacing: 0.3px;
+}
+
+.start-btn:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+}
+
+.start-btn:active {
+    transform: translateY(0);
+}
+
+.start-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ============================================
+   GAME HEADER
+   ============================================ */
+.game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.game-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.quit-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text2);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.quit-btn:hover {
+    border-color: var(--red);
+    color: var(--red);
+}
+
+.game-mode-badge {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+}
+
+.undo-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text2);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.undo-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.undo-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   X01 GAME SCREEN
+   ============================================ */
+.x01-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Scorecards */
+.scorecards {
+    display: flex;
+    gap: 0;
+    padding: 12px 12px 0;
+    flex-shrink: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+}
+
+.scorecards::-webkit-scrollbar {
+    display: none;
+}
+
+.scorecard {
+    flex: 0 0 auto;
+    width: 100px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    text-align: center;
+    position: relative;
+    transition: all 0.2s ease;
+    margin: 0 4px;
+}
+
+.scorecards-fill .scorecard {
+    flex: 1;
+    width: auto;
+}
+
+.scorecard.active {
+    border-color: var(--player-color, var(--accent));
+    background: var(--surface2);
+    box-shadow: 0 0 0 1px var(--player-color, var(--accent)),
+                0 4px 16px rgba(0, 0, 0, 0.3);
+    transform: scale(1.02);
+    z-index: 1;
+}
+
+.scorecard.active::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 3px;
+    background: var(--player-color, var(--accent));
+    border-radius: 0 0 3px 3px;
+}
+
+.scorecard-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scorecard.active .scorecard-name {
+    color: var(--player-color, var(--accent));
+}
+
+.scorecard-score {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 4px;
+    color: var(--text);
+}
+
+.scorecard.active .scorecard-score {
+    font-size: 36px;
+}
+
+.scorecard-stats {
+    font-size: 11px;
+    color: var(--text3);
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.scorecard-last {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 4px;
+    min-height: 16px;
+}
+
+.scorecard-last .bust {
+    color: var(--red);
+    font-weight: 600;
+}
+
+/* Turn info bar */
+.turn-info {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.turn-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.checkout-hint {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+    text-align: right;
+    max-width: 55%;
+}
+
+.checkout-hint .label {
+    color: var(--text3);
+    font-weight: 400;
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 2px;
+}
+
+/* Dart chips display */
+.dart-chips-area {
+    margin: 0 12px 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.dart-chips {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+}
+
+.dart-chip {
+    flex: 1;
+    min-height: 52px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border2);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.dart-chip.empty {
+    border-style: dashed;
+}
+
+.dart-chip-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+}
+
+.dart-chip.empty .dart-chip-label {
+    color: var(--text3);
+}
+
+.dart-chip-value {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    line-height: 1;
+}
+
+.dart-chip.mod-double {
+    border-color: #f4c430;
+    background: rgba(244, 196, 48, 0.08);
+}
+.dart-chip.mod-double .dart-chip-label { color: #f4c430; }
+
+.dart-chip.mod-triple {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+}
+.dart-chip.mod-triple .dart-chip-label { color: var(--accent); }
+
+.dart-total {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -1px;
+    white-space: nowrap;
+    min-width: 56px;
+    text-align: right;
+}
+
+/* Dart numpad */
+.dart-numpad-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 12px 8px;
+    gap: 4px;
+    min-height: 0;
+}
+
+.modifier-row {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+    margin-bottom: 6px;
+}
+
+.mod-btn {
+    flex: 1;
+    padding: 6px 4px;
+    border: 1.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+}
+
+.mod-short {
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.mod-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    line-height: 1;
+}
+
+.mod-btn.active {
+    border-color: var(--border2);
+    color: var(--text2);
+}
+
+.mod-btn.mod-active-single {
+    border-color: var(--text2);
+    color: var(--text);
+    background: var(--surface2);
+}
+
+.mod-btn.mod-active-double {
+    border-color: #f4c430;
+    color: #f4c430;
+    background: rgba(244, 196, 48, 0.1);
+}
+
+.mod-btn.mod-active-triple {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+}
+
+.mod-btn:active {
+    transform: scale(0.96);
+}
+
+/* 5-column number grid */
+.dart-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 4px;
+    flex: 1;
+}
+
+.dart-num-btn {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dart-num-btn:active:not(:disabled) {
+    background: var(--surface3);
+    transform: scale(0.93);
+}
+
+.dart-num-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.dart-bull {
+    font-size: 13px;
+    color: var(--yellow, #f4c430);
+    border-color: rgba(244, 196, 48, 0.35);
+}
+
+.dart-miss {
+    font-size: 13px;
+    color: var(--text3);
+}
+
+
+.dart-ctrl-btn {
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dart-ctrl-btn:active:not(:disabled) {
+    transform: scale(0.93);
+}
+
+.dart-ctrl-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.dart-grid-spacer {
+    /* empty filler cell */
+}
+
+.dart-back {
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+    font-size: 18px;
+}
+
+.dart-confirm {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
+}
+
+.dart-confirm:active:not(:disabled) {
+    background: var(--accent-dark);
+}
+
+/* ============================================
+   CRICKET GAME SCREEN
+   ============================================ */
+.cricket-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.cricket-board {
+    flex: 1;
+    overflow: auto;
+    padding: 12px;
+}
+
+.cricket-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.cricket-table th {
+    padding: 6px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text2);
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.th-player-name {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.th-player-score {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    margin-top: 1px;
+}
+
+.th-score-active {
+    color: var(--accent);
+}
+
+.th-score-pending {
+    font-size: 0.75em;
+    opacity: 0.6;
+}
+
+.cricket-table th.num-col {
+    text-align: center;
+    color: var(--text3);
+    font-size: 11px;
+    position: sticky;
+    left: 0;
+    top: 0;
+    z-index: 3;
+    background: var(--surface2);
+}
+
+.cricket-table th.player-th {
+    text-align: center;
+    min-width: 80px;
+}
+
+.cricket-table th.active-th {
+    color: var(--accent);
+}
+
+.cricket-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.cricket-table tr:last-child td {
+    border-bottom: none;
+}
+
+.cricket-table tr.closed-row td {
+    opacity: 0.4;
+}
+
+.cricket-number {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    width: 60px;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--surface);
+}
+
+.cricket-table tr.closed-row .cricket-number {
+    background: var(--surface);
+}
+
+.cricket-number.bull {
+    font-size: 14px;
+}
+
+.marks-cell {
+    text-align: center;
+}
+
+.mark-symbol {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.marks-closed {
+    font-size: 20px;
+}
+
+.pending-mark .mark-symbol {
+    opacity: 0.55;
+}
+
+.score-cell {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+}
+
+/* Cricket turn input */
+.cricket-turn {
+    padding: 8px 10px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.cricket-dart-chips {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.cricket-dart-chips .dart-chip {
+    flex: 1;
+    min-height: 32px;
+    padding: 3px 4px;
+}
+
+.cricket-turn-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cricket-turn-title span {
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: 0;
+}
+
+.cricket-nums {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+/* Bull spans full width at top */
+.cricket-num-btn:first-child {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    gap: 12px;
+    padding: 6px 16px;
+}
+
+.cricket-num-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 6px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+    min-height: 50px;
+}
+
+.cricket-num-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.cricket-num-btn.has-marks {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+}
+
+/* Closed by all players — truly dead */
+.cricket-num-btn.num-dead {
+    opacity: 0.2;
+    cursor: not-allowed;
+}
+
+/* Closed by me, opponents still open — scoring opportunity */
+.cricket-num-btn.num-can-score {
+    border-color: #f4c430;
+    background: rgba(244, 196, 48, 0.08);
+}
+
+.cricket-num-label {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+}
+
+.cricket-mark-sym {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+
+.cricket-controls {
+    display: flex;
+    gap: 8px;
+}
+
+
+.cricket-confirm-btn {
+    flex: 1;
+    padding: 10px;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
+}
+
+.cricket-confirm-btn:active {
+    background: var(--accent-dark);
+}
+
+/* Cricket scoreboard */
+.cricket-scoreboard {
+    display: flex;
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.cricket-player-score {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    position: relative;
+}
+
+.cricket-player-score:last-child {
+    border-right: none;
+}
+
+.cricket-player-score.active::after {
+    content: '▲';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: var(--accent);
+}
+
+.cps-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.cps-score {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.cps-score.active-score {
+    color: var(--accent);
+}
+
+/* ============================================
+   GAME OVER SCREEN
+   ============================================ */
+.gameover-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    text-align: center;
+    gap: 24px;
+}
+
+.trophy {
+    font-size: 72px;
+    animation: bounce 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-20px); }
+    60% { transform: translateY(-8px); }
+}
+
+.winner-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text2);
+}
+
+.winner-name {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--accent);
+    margin: 8px 0;
+}
+
+.winner-subtitle {
+    font-size: 14px;
+    color: var(--text2);
+}
+
+.stats-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    text-align: left;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.stat-value.accent {
+    color: var(--accent);
+}
+
+.gameover-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.rematch-btn {
+    padding: 16px;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    color: #000;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 4px 16px rgba(0, 212, 170, 0.35);
+}
+
+.rematch-btn:hover {
+    background: var(--accent-dark);
+}
+
+.new-game-btn {
+    padding: 14px;
+    background: transparent;
+    border: 1.5px solid var(--border2);
+    border-radius: var(--radius);
+    color: var(--text2);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.new-game-btn:hover {
+    border-color: var(--text2);
+    color: var(--text);
+}
+
+/* ============================================
+   ALL PLAYER STATS TABLE (game over)
+   ============================================ */
+.all-stats {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.all-stats table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.all-stats th {
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text2);
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+
+.all-stats th:not(:first-child) {
+    text-align: center;
+}
+
+.all-stats td {
+    padding: 10px 10px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+}
+
+.all-stats tr:last-child td {
+    border-bottom: none;
+}
+
+.all-stats td:not(:first-child) {
+    text-align: center;
+    font-weight: 600;
+}
+
+.all-stats tr.winner-row td {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.player-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.player-name-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   UTILITY
+   ============================================ */
+.divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 16px;
+}
+
+.bust-flash {
+    animation: bustFlash 0.4s ease;
+}
+
+@keyframes bustFlash {
+    0% { background: rgba(224, 82, 82, 0.3); }
+    100% { background: transparent; }
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-height: 700px) {
+    .dart-chip {
+        min-height: 44px;
+    }
+
+    .scorecard-score {
+        font-size: 26px;
+    }
+
+    .scorecard.active .scorecard-score {
+        font-size: 30px;
+    }
+}
+
+@media (max-height: 600px) {
+    .dart-chip {
+        min-height: 38px;
+    }
+
+    .dart-chips-area {
+        margin-bottom: 4px;
+    }
+
+    .home-header {
+        padding: 16px 20px 12px;
+    }
+
+    .home-header .logo {
+        font-size: 32px;
+    }
+}
