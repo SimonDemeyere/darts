@@ -61,6 +61,7 @@ const state = {
         startScore: 501,
         outType: 'double',
         cricketMode: 'standard',
+        hardcoreEffect: 'penalty',
         players: ['Player 1', 'Player 2'],
     },
     game: null,
@@ -220,10 +221,13 @@ class X01Game {
    CRICKET GAME
    ============================================================ */
 class CricketGame {
-    constructor(players, hardcore = false) {
-        this.hardcore = hardcore;
+    constructor(players, mode = 'standard', hardcoreEffect = 'penalty') {
+        this.mode = mode; // 'standard' | 'cutthroat' | 'hardcore' | 'cutthroat-hardcore'
+        this.hardcore = mode === 'hardcore' || mode === 'cutthroat-hardcore';
+        this.cutthroat = mode === 'cutthroat' || mode === 'cutthroat-hardcore';
+        this.hardcoreEffect = hardcoreEffect; // 'penalty' | 'benefit'
         this.winTargets = [25, 20, 19, 18, 17, 16, 15];
-        this.targets = hardcore
+        this.targets = this.hardcore
             ? [25, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
             : [25, 20, 19, 18, 17, 16, 15];
         const emptyMarks = {};
@@ -328,7 +332,24 @@ class CricketGame {
 
             if (scoringMarks > 0) {
                 if (isPenalty) {
-                    player.score -= num * scoringMarks;
+                    if (this.hardcoreEffect === 'benefit') {
+                        this.players.forEach(p => {
+                            if (p.id !== player.id) {
+                                // Cricket: add to opponents; Cut Throat: remove from opponents
+                                p.score += this.cutthroat ? -(num * scoringMarks) : (num * scoringMarks);
+                            }
+                        });
+                    } else {
+                        // Cricket: remove from yourself; Cut Throat: add to yourself
+                        player.score += this.cutthroat ? (num * scoringMarks) : -(num * scoringMarks);
+                    }
+                } else if (this.cutthroat) {
+                    // Give points to opponents who haven't closed this number
+                    this.players.forEach(p => {
+                        if (p.id !== player.id && p.marks[num] < 3) {
+                            p.score += num * scoringMarks;
+                        }
+                    });
                 } else {
                     const anyOpponentOpen = this.players.some(
                         p => p.id !== player.id && p.marks[num] < 3
@@ -353,10 +374,18 @@ class CricketGame {
         for (const player of this.players) {
             const allClosed = this.winTargets.every(t => player.marks[t] >= 3);
             if (allClosed) {
-                const maxScore = Math.max(...this.players.map(p => p.score));
-                if (player.score >= maxScore) {
-                    this.winner = player;
-                    return;
+                if (this.cutthroat) {
+                    const minScore = Math.min(...this.players.map(p => p.score));
+                    if (player.score <= minScore) {
+                        this.winner = player;
+                        return;
+                    }
+                } else {
+                    const maxScore = Math.max(...this.players.map(p => p.score));
+                    if (player.score >= maxScore) {
+                        this.winner = player;
+                        return;
+                    }
                 }
             }
         }
@@ -397,6 +426,8 @@ function marksHTML(marks, color) {
 function renderHome() {
     const { setup } = state;
     const isX01 = setup.gameType === 'x01';
+    const isCricket = setup.gameType === 'cricket';
+    const isCutThroat = setup.gameType === 'cutthroat';
 
     const playersHTML = setup.players.map((name, i) => `
         <div class="player-row">
@@ -422,7 +453,7 @@ function renderHome() {
         </button>
     `;
 
-    const cricketConfig = !isX01 ? `
+    const cricketConfig = (isCricket || isCutThroat) ? `
         <div>
             <div class="section-label">Mode</div>
             <div class="option-group">
@@ -432,6 +463,17 @@ function renderHome() {
                     data-action="set-cricket-mode" data-value="hardcore">Hardcore</button>
             </div>
         </div>
+        ${setup.cricketMode === 'hardcore' ? `
+        <div>
+            <div class="section-label">Hardcore Effect</div>
+            <div class="option-group">
+                <button class="option-btn ${setup.hardcoreEffect === 'penalty' ? 'active' : ''}"
+                    data-action="set-hardcore-effect" data-value="penalty">Penalty yourself</button>
+                <button class="option-btn ${setup.hardcoreEffect === 'benefit' ? 'active' : ''}"
+                    data-action="set-hardcore-effect" data-value="benefit">Benefit opponent</button>
+            </div>
+        </div>
+        ` : ''}
     ` : '';
 
     const x01Config = isX01 ? `
@@ -468,8 +510,10 @@ function renderHome() {
                     <div class="tab-group">
                         <button class="tab-btn ${isX01 ? 'active' : ''}"
                             data-action="set-game" data-value="x01">X01</button>
-                        <button class="tab-btn ${!isX01 ? 'active' : ''}"
+                        <button class="tab-btn ${isCricket ? 'active' : ''}"
                             data-action="set-game" data-value="cricket">Cricket</button>
+                        <button class="tab-btn ${isCutThroat ? 'active' : ''}"
+                            data-action="set-game" data-value="cutthroat">Cut Throat</button>
                     </div>
                 </div>
                 ${x01Config}
@@ -644,7 +688,12 @@ function renderCricket() {
             const scoringMarks = Math.max(0, marks - closingMarks);
             if (scoringMarks > 0) {
                 if (game.hardcore && num < 15) {
-                    liveScoredPoints -= num * scoringMarks;
+                    if (game.hardcoreEffect === 'benefit') {
+                        // Shown in cutthroatPending below
+                    } else {
+                        // Cricket: remove from self; Cut Throat: add to self
+                        liveScoredPoints += game.cutthroat ? (num * scoringMarks) : -(num * scoringMarks);
+                    }
                 } else {
                     const anyOpponentOpen = game.players.some(p => p.id !== currentPlayer.id && p.marks[num] < 3);
                     if (anyOpponentOpen) liveScoredPoints += num * scoringMarks;
@@ -653,11 +702,44 @@ function renderCricket() {
         }
     }
 
+    // Compute pending points opponents would receive (cut throat + hardcore benefit)
+    const cutthroatPending = {};
+    if (!game.winner) {
+        for (const num of game.targets) {
+            const marks = liveMarks[num] || 0;
+            if (marks === 0) continue;
+            const existingMarks = currentPlayer.marks[num];
+            const closingMarks = Math.max(0, 3 - existingMarks);
+            const scoringMarks = Math.max(0, marks - closingMarks);
+            if (scoringMarks > 0) {
+                const isHardcoreNum = game.hardcore && num < 15;
+                if (game.cutthroat && !isHardcoreNum) {
+                    // Standard cut throat: give to opponents who haven't closed
+                    game.players.forEach(p => {
+                        if (p.id !== currentPlayer.id && p.marks[num] < 3) {
+                            cutthroatPending[p.id] = (cutthroatPending[p.id] || 0) + num * scoringMarks;
+                        }
+                    });
+                } else if (isHardcoreNum && game.hardcoreEffect === 'benefit') {
+                    // Cricket: add to opponents; Cut Throat: remove from opponents
+                    const delta = game.cutthroat ? -(num * scoringMarks) : (num * scoringMarks);
+                    game.players.forEach(p => {
+                        if (p.id !== currentPlayer.id) {
+                            cutthroatPending[p.id] = (cutthroatPending[p.id] || 0) + delta;
+                        }
+                    });
+                }
+            }
+        }
+    }
+
     // Cricket board table — score embedded in header
     const headerCells = game.players.map((p) => {
         const isActive = p.id === currentPlayer.id && !game.winner;
-        const displayScore = isActive && liveScoredPoints !== 0
-            ? `${p.score} <span class="th-score-pending">${liveScoredPoints > 0 ? '+' : ''}${liveScoredPoints}</span>`
+        const opponentPending = cutthroatPending[p.id] || 0;
+        const pending = opponentPending || (isActive ? liveScoredPoints : 0);
+        const displayScore = pending !== 0
+            ? `${p.score} <span class="th-score-pending">${pending > 0 ? '+' : ''}${pending}</span>`
             : p.score;
         return `<th class="player-th ${isActive ? 'active-th' : ''}">
             <div class="th-player-name" style="color:${p.color}">${escapeHtml(p.name)}</div>
@@ -685,10 +767,10 @@ function renderCricket() {
             return '';
         }).filter(Boolean).join('/');
 
-        const isPenalty = game.hardcore && num < 15;
+        const isHardcoreNum = game.hardcore && num < 15;
         return `
-            <tr class="${allClosed ? 'closed-row' : ''} ${isPenalty ? 'penalty-row' : ''}">
-                <td class="cricket-number ${num === 25 ? 'bull' : ''} ${isPenalty ? 'penalty-number' : ''}">${label}</td>
+            <tr class="${allClosed ? 'closed-row' : ''} ${isHardcoreNum ? 'penalty-row' : ''}">
+                <td class="cricket-number ${num === 25 ? 'bull' : ''} ${isHardcoreNum ? 'penalty-number' : ''}">${label}</td>
                 ${playerMarkCells.join('')}
             </tr>
         `;
@@ -711,8 +793,8 @@ function renderCricket() {
             <button class="cricket-num-btn
                 ${hasTurnMarks ? 'has-marks' : ''}
                 ${isDeadForAll ? 'num-dead' : ''}
-                ${isPenalty && !isClosed ? 'num-penalty' : ''}
-                ${isPenalty && isClosed ? 'num-penalty-active' : ''}
+                ${isPenalty && !isClosed && !game.cutthroat ? 'num-penalty' : ''}
+                ${isPenalty && isClosed ? 'num-can-score' : ''}
                 ${canScore && !hasTurnMarks && !isPenalty ? 'num-can-score' : ''}"
                 data-action="cricket-toggle" data-num="${num}"
                 ${isDeadForAll || dartsFull ? 'disabled' : ''}>
@@ -738,7 +820,11 @@ function renderCricket() {
             <div class="game-header">
                 <div class="game-header-left">
                     <button class="quit-btn" data-action="quit">✕ Quit</button>
-                    <span class="game-mode-badge">Cricket${game.hardcore ? ' · Hardcore' : ''}</span>
+                    <span class="game-mode-badge">${
+                        game.mode === 'cutthroat-hardcore' ? 'Cut Throat · Hardcore' :
+                        game.hardcore ? 'Hardcore' :
+                        game.cutthroat ? 'Cut Throat' : 'Cricket'
+                    }</span>
                 </div>
                 <button class="undo-btn" data-action="undo" ${game.stateHistory.length === 0 ? 'disabled' : ''}>
                     ↩ Undo
@@ -762,6 +848,7 @@ function renderCricket() {
                     <span style="color:var(--text2)">
                         ${game.winner ? '🏆 Game Over' : `<span style="color:${currentPlayer.color}">${escapeHtml(currentPlayer.name)}</span>'s turn`}
                     </span>
+                    ${game.cutthroat ? `<span class="cutthroat-label">lowest score wins</span>` : ''}
                 </div>
                 <div class="cricket-dart-chips">
                     ${[0,1,2].map(i => {
@@ -971,6 +1058,11 @@ document.addEventListener('click', e => {
             render();
             break;
 
+        case 'set-hardcore-effect':
+            state.setup.hardcoreEffect = value;
+            render();
+            break;
+
         case 'add-player':
             state.setup.players.push(`Player ${state.setup.players.length + 1}`);
             render();
@@ -1095,7 +1187,7 @@ document.addEventListener('click', e => {
    START GAME
    ============================================================ */
 function startGame(rematch = false) {
-    const { gameType, startScore, outType, cricketMode, players } = state.setup;
+    const { gameType, startScore, outType, cricketMode, hardcoreEffect, players } = state.setup;
     const names = rematch && state.game
         ? state.game.players.map(p => p.name)
         : players;
@@ -1103,8 +1195,13 @@ function startGame(rematch = false) {
     if (gameType === 'x01') {
         state.game = new X01Game(startScore, names, outType);
         state.view = 'x01';
+    } else if (gameType === 'cutthroat') {
+        const mode = cricketMode === 'hardcore' ? 'cutthroat-hardcore' : 'cutthroat';
+        state.game = new CricketGame(names, mode, hardcoreEffect);
+        state.view = 'cricket';
     } else {
-        state.game = new CricketGame(names, cricketMode === 'hardcore');
+        const mode = cricketMode === 'hardcore' ? 'hardcore' : 'standard';
+        state.game = new CricketGame(names, mode, hardcoreEffect);
         state.view = 'cricket';
     }
     render();
