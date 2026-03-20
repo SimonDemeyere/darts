@@ -60,6 +60,7 @@ const state = {
         gameType: 'x01',
         startScore: 501,
         outType: 'double',
+        cricketMode: 'standard',
         players: ['Player 1', 'Player 2'],
     },
     game: null,
@@ -219,13 +220,19 @@ class X01Game {
    CRICKET GAME
    ============================================================ */
 class CricketGame {
-    constructor(players) {
-        this.targets = [25, 20, 19, 18, 17, 16, 15];
+    constructor(players, hardcore = false) {
+        this.hardcore = hardcore;
+        this.winTargets = [25, 20, 19, 18, 17, 16, 15];
+        this.targets = hardcore
+            ? [25, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+            : [25, 20, 19, 18, 17, 16, 15];
+        const emptyMarks = {};
+        this.targets.forEach(t => { emptyMarks[t] = 0; });
         this.players = players.map((name, i) => ({
             id: i,
             name: name || `Player ${i + 1}`,
             color: playerColor(i),
-            marks: { 20: 0, 19: 0, 18: 0, 17: 0, 16: 0, 15: 0, 25: 0 },
+            marks: { ...emptyMarks },
             score: 0,
             dartsThrown: 0,
             rounds: 0,
@@ -238,7 +245,9 @@ class CricketGame {
     }
 
     _emptyTurnMarks() {
-        return { 20: 0, 19: 0, 18: 0, 17: 0, 16: 0, 15: 0, 25: 0 };
+        const m = {};
+        this.targets.forEach(t => { m[t] = 0; });
+        return m;
     }
 
     get turnMarks() {
@@ -308,17 +317,25 @@ class CricketGame {
             if (marks === 0) continue;
 
             const existingMarks = player.marks[num];
-            player.marks[num] = Math.min(existingMarks + marks, 3);
+            const isPenalty = this.hardcore && num < 15;
+            // Penalty numbers track real hit count; standard numbers cap at 3
+            player.marks[num] = isPenalty
+                ? existingMarks + marks
+                : Math.min(existingMarks + marks, 3);
 
             const closingMarks = Math.max(0, 3 - existingMarks);
             const scoringMarks = Math.max(0, marks - closingMarks);
 
             if (scoringMarks > 0) {
-                const anyOpponentOpen = this.players.some(
-                    p => p.id !== player.id && p.marks[num] < 3
-                );
-                if (anyOpponentOpen) {
-                    player.score += num * scoringMarks;
+                if (isPenalty) {
+                    player.score -= num * scoringMarks;
+                } else {
+                    const anyOpponentOpen = this.players.some(
+                        p => p.id !== player.id && p.marks[num] < 3
+                    );
+                    if (anyOpponentOpen) {
+                        player.score += num * scoringMarks;
+                    }
                 }
             }
         }
@@ -334,7 +351,7 @@ class CricketGame {
 
     _checkWin() {
         for (const player of this.players) {
-            const allClosed = this.targets.every(t => player.marks[t] >= 3);
+            const allClosed = this.winTargets.every(t => player.marks[t] >= 3);
             if (allClosed) {
                 const maxScore = Math.max(...this.players.map(p => p.score));
                 if (player.score >= maxScore) {
@@ -405,6 +422,18 @@ function renderHome() {
         </button>
     `;
 
+    const cricketConfig = !isX01 ? `
+        <div>
+            <div class="section-label">Mode</div>
+            <div class="option-group">
+                <button class="option-btn ${setup.cricketMode === 'standard' ? 'active' : ''}"
+                    data-action="set-cricket-mode" data-value="standard">Standard</button>
+                <button class="option-btn ${setup.cricketMode === 'hardcore' ? 'active' : ''}"
+                    data-action="set-cricket-mode" data-value="hardcore">Hardcore</button>
+            </div>
+        </div>
+    ` : '';
+
     const x01Config = isX01 ? `
         <div>
             <div class="section-label">Starting Score</div>
@@ -444,6 +473,7 @@ function renderHome() {
                     </div>
                 </div>
                 ${x01Config}
+                ${cricketConfig}
                 <div>
                     <div class="section-label">Players</div>
                     <div class="players-list">
@@ -514,8 +544,8 @@ function renderX01() {
     const turnLabel = game.winner
         ? `🏆 ${escapeHtml(game.winner.name)} wins!`
         : prevBusted
-            ? `<span style="color:var(--red)">BUST!</span> — ${escapeHtml(currentPlayer.name)}'s turn`
-            : `${escapeHtml(currentPlayer.name)}'s turn`;
+            ? `<span style="color:var(--red)">BUST!</span> — <span style="color:${currentPlayer.color}">${escapeHtml(currentPlayer.name)}</span>'s turn`
+            : `<span style="color:${currentPlayer.color}">${escapeHtml(currentPlayer.name)}</span>'s turn`;
 
     // Dart chips
     const dartsHTML = [0, 1, 2].map(i => {
@@ -586,7 +616,7 @@ function renderX01() {
                     <button class="dart-num-btn dart-miss" data-action="dart-number" data-value="0" ${nd}>Miss</button>
                     <span class="dart-grid-spacer"></span>
                     <button class="dart-ctrl-btn dart-back" data-action="dart-back" ${game.darts.length === 0 ? 'disabled' : ''}>⌫</button>
-                    <button class="dart-ctrl-btn dart-confirm" data-action="confirm">✓</button>
+                    <button class="dart-ctrl-btn dart-confirm" data-action="confirm">${game.darts.length === 0 ? 'Triple Niet' : '✓'}</button>
                 </div>
             </div>
         </div>
@@ -603,7 +633,7 @@ function renderCricket() {
     const currentPlayer = game.currentPlayer;
     const liveMarks = game.turnMarks;
 
-    // Compute live score gain for current player based on pending darts
+    // Compute live score delta for current player based on pending darts
     let liveScoredPoints = 0;
     if (!game.winner) {
         for (const num of game.targets) {
@@ -613,8 +643,12 @@ function renderCricket() {
             const closingMarks = Math.max(0, 3 - existingMarks);
             const scoringMarks = Math.max(0, marks - closingMarks);
             if (scoringMarks > 0) {
-                const anyOpponentOpen = game.players.some(p => p.id !== currentPlayer.id && p.marks[num] < 3);
-                if (anyOpponentOpen) liveScoredPoints += num * scoringMarks;
+                if (game.hardcore && num < 15) {
+                    liveScoredPoints -= num * scoringMarks;
+                } else {
+                    const anyOpponentOpen = game.players.some(p => p.id !== currentPlayer.id && p.marks[num] < 3);
+                    if (anyOpponentOpen) liveScoredPoints += num * scoringMarks;
+                }
             }
         }
     }
@@ -622,8 +656,8 @@ function renderCricket() {
     // Cricket board table — score embedded in header
     const headerCells = game.players.map((p) => {
         const isActive = p.id === currentPlayer.id && !game.winner;
-        const displayScore = isActive && liveScoredPoints > 0
-            ? `${p.score} <span class="th-score-pending">+${liveScoredPoints}</span>`
+        const displayScore = isActive && liveScoredPoints !== 0
+            ? `${p.score} <span class="th-score-pending">${liveScoredPoints > 0 ? '+' : ''}${liveScoredPoints}</span>`
             : p.score;
         return `<th class="player-th ${isActive ? 'active-th' : ''}">
             <div class="th-player-name" style="color:${p.color}">${escapeHtml(p.name)}</div>
@@ -640,7 +674,7 @@ function renderCricket() {
             const pendingAdded = isCurrentPlayer ? (liveMarks[num] || 0) : 0;
             const marks = Math.min(p.marks[num] + pendingAdded, 3);
             const isPending = isCurrentPlayer && pendingAdded > 0 && marks > p.marks[num];
-            return `<td class="marks-cell ${isPending ? 'pending-mark' : ''}">${marksHTML(marks, p.color)}</td>`;
+            return `<td class="marks-cell ${isPending ? 'pending-mark' : ''} ${isCurrentPlayer ? 'active-col' : ''}">${marksHTML(marks, p.color)}</td>`;
         });
 
         const scoreInfo = game.players.map(p => {
@@ -651,47 +685,60 @@ function renderCricket() {
             return '';
         }).filter(Boolean).join('/');
 
+        const isPenalty = game.hardcore && num < 15;
         return `
-            <tr class="${allClosed ? 'closed-row' : ''}">
-                <td class="cricket-number ${num === 25 ? 'bull' : ''}">${label}</td>
+            <tr class="${allClosed ? 'closed-row' : ''} ${isPenalty ? 'penalty-row' : ''}">
+                <td class="cricket-number ${num === 25 ? 'bull' : ''} ${isPenalty ? 'penalty-number' : ''}">${label}</td>
                 ${playerMarkCells.join('')}
             </tr>
         `;
     }).join('');
 
     // Build turn input buttons
-    const turnBtnsHTML = game.targets.map(num => {
+    const buildBtn = (num) => {
         const label = num === 25 ? 'Bull' : num;
         const turnMarkCount = game.turnMarks[num];
         const committedMarks = currentPlayer.marks[num];
         const combinedMarks = Math.min(committedMarks + turnMarkCount, 3);
         const isClosed = committedMarks >= 3;
-        const isDeadForAll = game.isClosedForAll(num);
+        const isPenalty = game.hardcore && num < 15;
+        const isDeadForAll = !isPenalty && game.isClosedForAll(num);
         const canScore = isClosed && !isDeadForAll;
         const hasTurnMarks = turnMarkCount > 0;
         const dartsFull = game.turnDarts.length >= 3;
-
         const markSym = combinedMarks === 0 ? '' : combinedMarks === 1 ? '/' : combinedMarks === 2 ? '✕' : '⊗';
-
         return `
             <button class="cricket-num-btn
                 ${hasTurnMarks ? 'has-marks' : ''}
                 ${isDeadForAll ? 'num-dead' : ''}
-                ${canScore && !hasTurnMarks ? 'num-can-score' : ''}"
+                ${isPenalty && !isClosed ? 'num-penalty' : ''}
+                ${isPenalty && isClosed ? 'num-penalty-active' : ''}
+                ${canScore && !hasTurnMarks && !isPenalty ? 'num-can-score' : ''}"
                 data-action="cricket-toggle" data-num="${num}"
                 ${isDeadForAll || dartsFull ? 'disabled' : ''}>
                 <span class="cricket-num-label">${label}</span>
                 <span class="cricket-mark-sym" style="color:${combinedMarks > 0 ? currentPlayer.color : 'transparent'}">${markSym || '·'}</span>
             </button>
         `;
-    }).join('');
+    };
+
+    const standardNums = [25, 20, 19, 18, 17, 16, 15];
+    const turnBtnsHTML = standardNums.map(buildBtn).join('');
+    const penaltyBtnsHTML = game.hardcore
+        ? `<div class="cricket-penalty-section">
+               <div class="cricket-penalty-label">Penalty numbers</div>
+               <div class="cricket-nums cricket-penalty-nums">
+                   ${[14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(buildBtn).join('')}
+               </div>
+           </div>`
+        : '';
 
     return `
         <div class="cricket-screen">
             <div class="game-header">
                 <div class="game-header-left">
                     <button class="quit-btn" data-action="quit">✕ Quit</button>
-                    <span class="game-mode-badge">Cricket</span>
+                    <span class="game-mode-badge">Cricket${game.hardcore ? ' · Hardcore' : ''}</span>
                 </div>
                 <button class="undo-btn" data-action="undo" ${game.stateHistory.length === 0 ? 'disabled' : ''}>
                     ↩ Undo
@@ -713,7 +760,7 @@ function renderCricket() {
             <div class="cricket-turn">
                 <div class="cricket-turn-title">
                     <span style="color:var(--text2)">
-                        ${game.winner ? '🏆 Game Over' : escapeHtml(currentPlayer.name) + "'s turn"}
+                        ${game.winner ? '🏆 Game Over' : `<span style="color:${currentPlayer.color}">${escapeHtml(currentPlayer.name)}</span>'s turn`}
                     </span>
                 </div>
                 <div class="cricket-dart-chips">
@@ -737,15 +784,13 @@ function renderCricket() {
                     `).join('')}
                 </div>
                 <div class="cricket-nums">${turnBtnsHTML}</div>
+                ${penaltyBtnsHTML}
                 <div class="cricket-controls">
-                    <button class="undo-btn" data-action="undo"
-                        style="flex:0 0 auto"
-                        ${game.stateHistory.length === 0 ? 'disabled' : ''}>↩</button>
                     <button class="undo-btn" data-action="cricket-back"
                         style="flex:0 0 auto"
                         ${game.turnDarts.length === 0 ? 'disabled' : ''}>⌫</button>
                     <button class="cricket-confirm-btn" data-action="cricket-confirm">
-                        ${game.winner ? 'See Results' : 'End Turn'}
+                        ${game.winner ? 'See Results' : game.turnDarts.length === 0 ? 'Triple Niet' : 'End Turn'}
                     </button>
                 </div>
             </div>
@@ -921,6 +966,11 @@ document.addEventListener('click', e => {
             render();
             break;
 
+        case 'set-cricket-mode':
+            state.setup.cricketMode = value;
+            render();
+            break;
+
         case 'add-player':
             state.setup.players.push(`Player ${state.setup.players.length + 1}`);
             render();
@@ -1045,7 +1095,7 @@ document.addEventListener('click', e => {
    START GAME
    ============================================================ */
 function startGame(rematch = false) {
-    const { gameType, startScore, outType, players } = state.setup;
+    const { gameType, startScore, outType, cricketMode, players } = state.setup;
     const names = rematch && state.game
         ? state.game.players.map(p => p.name)
         : players;
@@ -1054,7 +1104,7 @@ function startGame(rematch = false) {
         state.game = new X01Game(startScore, names, outType);
         state.view = 'x01';
     } else {
-        state.game = new CricketGame(names);
+        state.game = new CricketGame(names, cricketMode === 'hardcore');
         state.view = 'cricket';
     }
     render();
