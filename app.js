@@ -276,10 +276,11 @@ class CricketGame {
         this.modifier = n;
     }
 
-    addMark(num) {
+    addMark(num, forcedMarks) {
         if (this.turnDarts.length >= 3) return;
-        this.turnDarts.push({ num, marks: this.modifier });
-        this.modifier = 1;
+        const marks = forcedMarks !== undefined ? forcedMarks : this.modifier;
+        this.turnDarts.push({ num, marks });
+        if (forcedMarks === undefined) this.modifier = 1;
     }
 
     removeLastDart() {
@@ -694,7 +695,7 @@ function renderCricket() {
                         // Cricket: remove from self; Cut Throat: add to self
                         liveScoredPoints += game.cutthroat ? (num * scoringMarks) : -(num * scoringMarks);
                     }
-                } else {
+                } else if (!game.cutthroat) {
                     const anyOpponentOpen = game.players.some(p => p.id !== currentPlayer.id && p.marks[num] < 3);
                     if (anyOpponentOpen) liveScoredPoints += num * scoringMarks;
                 }
@@ -756,7 +757,8 @@ function renderCricket() {
             const pendingAdded = isCurrentPlayer ? (liveMarks[num] || 0) : 0;
             const marks = Math.min(p.marks[num] + pendingAdded, 3);
             const isPending = isCurrentPlayer && pendingAdded > 0 && marks > p.marks[num];
-            return `<td class="marks-cell ${isPending ? 'pending-mark' : ''} ${isCurrentPlayer ? 'active-col' : ''}">${marksHTML(marks, p.color)}</td>`;
+            const isActivePenalty = isCurrentPlayer && game.hardcore && num < 15 && marks >= 3;
+            return `<td class="marks-cell ${isPending ? 'pending-mark' : ''} ${isCurrentPlayer ? 'active-col' : ''} ${isActivePenalty ? 'active-penalty-col' : ''}">${marksHTML(marks, p.color)}</td>`;
         });
 
         const scoreInfo = game.players.map(p => {
@@ -776,9 +778,11 @@ function renderCricket() {
         `;
     }).join('');
 
-    // Build turn input buttons
-    const buildBtn = (num) => {
-        const label = num === 25 ? 'Bull' : num;
+    // Build turn input buttons (forcedMarks overrides modifier for Bull buttons)
+    const buildBtn = (num, forcedMarks = null) => {
+        const label = forcedMarks === 2 && num === 25 ? 'D·Bull'
+                    : num === 25 ? 'Bull'
+                    : num;
         const turnMarkCount = game.turnMarks[num];
         const committedMarks = currentPlayer.marks[num];
         const combinedMarks = Math.min(committedMarks + turnMarkCount, 3);
@@ -789,14 +793,15 @@ function renderCricket() {
         const hasTurnMarks = turnMarkCount > 0;
         const dartsFull = game.turnDarts.length >= 3;
         const markSym = combinedMarks === 0 ? '' : combinedMarks === 1 ? '/' : combinedMarks === 2 ? '✕' : '⊗';
+        const forcedAttr = forcedMarks !== null ? `data-forced-marks="${forcedMarks}"` : '';
         return `
             <button class="cricket-num-btn
                 ${hasTurnMarks ? 'has-marks' : ''}
                 ${isDeadForAll ? 'num-dead' : ''}
-                ${isPenalty && !isClosed && !game.cutthroat ? 'num-penalty' : ''}
-                ${isPenalty && isClosed ? 'num-can-score' : ''}
+                ${isPenalty && !isClosed ? 'num-penalty' : ''}
+                ${isPenalty && isClosed ? 'num-penalty-active' : ''}
                 ${canScore && !hasTurnMarks && !isPenalty ? 'num-can-score' : ''}"
-                data-action="cricket-toggle" data-num="${num}"
+                data-action="cricket-toggle" data-num="${num}" ${forcedAttr}
                 ${isDeadForAll || dartsFull ? 'disabled' : ''}>
                 <span class="cricket-num-label">${label}</span>
                 <span class="cricket-mark-sym" style="color:${combinedMarks > 0 ? currentPlayer.color : 'transparent'}">${markSym || '·'}</span>
@@ -804,13 +809,15 @@ function renderCricket() {
         `;
     };
 
-    const standardNums = [25, 20, 19, 18, 17, 16, 15];
-    const turnBtnsHTML = standardNums.map(buildBtn).join('');
+    const turnBtnsHTML = [
+        buildBtn(25, 2), buildBtn(25, 1),
+        buildBtn(20), buildBtn(19), buildBtn(18), buildBtn(17), buildBtn(16), buildBtn(15),
+    ].join('');
     const penaltyBtnsHTML = game.hardcore
         ? `<div class="cricket-penalty-section">
                <div class="cricket-penalty-label">Penalty numbers</div>
                <div class="cricket-nums cricket-penalty-nums">
-                   ${[14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(buildBtn).join('')}
+                   ${[14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(n => buildBtn(n)).join('')}
                </div>
            </div>`
         : '';
@@ -988,6 +995,7 @@ function renderGameOver() {
 function render() {
     const app = document.getElementById('app');
     const game = state.game;
+    if (state.view === 'home') saveSetup();
 
     // Check if we should show game over
     if (game && game.winner && state.view !== 'gameover') {
@@ -1135,7 +1143,8 @@ document.addEventListener('click', e => {
 
         case 'cricket-toggle':
             if (state.view === 'cricket' && state.game && !state.game.winner) {
-                state.game.addMark(parseInt(btn.dataset.num));
+                const forcedMarks = btn.dataset.forcedMarks !== undefined ? parseInt(btn.dataset.forcedMarks) : undefined;
+                state.game.addMark(parseInt(btn.dataset.num), forcedMarks);
                 render();
             }
             break;
@@ -1219,8 +1228,23 @@ function escapeHtml(str) {
 }
 
 /* ============================================================
+   PERSISTENCE
+   ============================================================ */
+function saveSetup() {
+    localStorage.setItem('darts-setup', JSON.stringify(state.setup));
+}
+
+function loadSetup() {
+    try {
+        const saved = localStorage.getItem('darts-setup');
+        if (saved) Object.assign(state.setup, JSON.parse(saved));
+    } catch (e) {}
+}
+
+/* ============================================================
    INIT
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
+    loadSetup();
     render();
 });

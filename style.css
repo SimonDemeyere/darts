@@ -916,17 +916,9 @@ html, body {
 
 .cricket-nums {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 6px;
     margin-bottom: 6px;
-}
-
-/* Bull spans full width at top */
-.cricket-num-btn:first-child {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    gap: 12px;
-    padding: 6px 16px;
 }
 
 .cricket-num-btn {
@@ -935,13 +927,13 @@ html, body {
     align-items: center;
     justify-content: center;
     gap: 2px;
-    padding: 6px 6px;
+    padding: 4px 4px;
     background: var(--surface2);
     border: 2px solid var(--border);
     border-radius: var(--radius);
     cursor: pointer;
     transition: background 0.12s, border-color 0.12s;
-    min-height: 50px;
+    min-height: 38px;
 }
 
 .cricket-num-btn:active:not(:disabled) {
@@ -991,7 +983,7 @@ html, body {
     margin-bottom: 4px;
 }
 
-/* Cricket Hardcore penalty numbers */
+/* Penalty number — not yet closed */
 .cricket-num-btn.num-penalty {
     border-color: rgba(224, 82, 82, 0.4);
     background: rgba(224, 82, 82, 0.06);
@@ -1001,26 +993,35 @@ html, body {
     color: var(--red);
 }
 
-.cricket-penalty-nums {
-    grid-template-columns: repeat(7, 1fr);
+/* Penalty number — closed, now live */
+.cricket-num-btn.num-penalty-active {
+    border-color: var(--red);
+    background: rgba(224, 82, 82, 0.18);
+    box-shadow: 0 0 0 1px var(--red);
 }
 
-.cricket-penalty-nums .cricket-num-btn:first-child {
-    grid-column: auto;
-    flex-direction: column;
-    gap: 2px;
-    padding: 6px 6px;
+.cricket-num-btn.num-penalty-active .cricket-num-label {
+    color: var(--red);
+}
+
+/* Active player's closed penalty cell in table */
+.marks-cell.active-penalty-col {
+    background: rgba(224, 82, 82, 0.12);
+}
+
+.cricket-penalty-nums {
+    grid-template-columns: repeat(4, 1fr);
 }
 
 .cricket-num-label {
-    font-size: 17px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--text);
     line-height: 1;
 }
 
 .cricket-mark-sym {
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 800;
     line-height: 1;
 }
