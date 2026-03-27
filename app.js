@@ -56,6 +56,7 @@ const playerColor = i => PLAYER_COLORS[i % PLAYER_COLORS.length];
    ============================================================ */
 const state = {
     view: 'home',
+    theme: 'dark',
     setup: {
         gameType: 'x01',
         startScore: 501,
@@ -501,6 +502,9 @@ function renderHome() {
     return `
         <div class="home-screen">
             <div class="home-header">
+                <button class="theme-toggle" data-action="toggle-theme">
+                    ${state.theme === 'jobtoolz' ? '🌙 Dark' : '☀️ Jobtoolz'}
+                </button>
                 <div class="logo">🎯</div>
                 <h1>Darts Scorer</h1>
                 <p>Keep score like a pro</p>
@@ -851,12 +855,7 @@ function renderCricket() {
             </div>
 
             <div class="cricket-turn">
-                <div class="cricket-turn-title">
-                    <span style="color:var(--text2)">
-                        ${game.winner ? '🏆 Game Over' : `<span style="color:${currentPlayer.color}">${escapeHtml(currentPlayer.name)}</span>'s turn`}
-                    </span>
-                    ${game.cutthroat ? `<span class="cutthroat-label">lowest score wins</span>` : ''}
-                </div>
+
                 <div class="cricket-dart-chips">
                     ${[0,1,2].map(i => {
                         const d = game.turnDarts[i];
@@ -881,8 +880,7 @@ function renderCricket() {
                 ${penaltyBtnsHTML}
                 <div class="cricket-controls">
                     <button class="undo-btn" data-action="cricket-back"
-                        style="flex:0 0 auto"
-                        ${game.turnDarts.length === 0 ? 'disabled' : ''}>⌫</button>
+                        ${game.turnDarts.length === 0 ? 'disabled' : ''}>↩<br><span style="font-size:10px;font-weight:600">Undo</span></button>
                     <button class="cricket-confirm-btn" data-action="cricket-confirm">
                         ${game.winner ? 'See Results' : game.turnDarts.length === 0 ? 'Triple Niet' : 'End Turn'}
                     </button>
@@ -995,6 +993,7 @@ function renderGameOver() {
 function render() {
     const app = document.getElementById('app');
     const game = state.game;
+    document.documentElement.setAttribute('data-theme', state.theme);
     if (state.view === 'home') saveSetup();
 
     // Check if we should show game over
@@ -1046,6 +1045,11 @@ document.addEventListener('click', e => {
 
     switch (action) {
         // HOME
+        case 'toggle-theme':
+            state.theme = state.theme === 'jobtoolz' ? 'dark' : 'jobtoolz';
+            localStorage.setItem('darts-theme', state.theme);
+            render();
+            break;
         case 'set-game':
             state.setup.gameType = value;
             render();
@@ -1245,6 +1249,8 @@ function loadSetup() {
    INIT
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('darts-theme');
+    if (savedTheme) state.theme = savedTheme;
     loadSetup();
     render();
 });

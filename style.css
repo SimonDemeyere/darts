@@ -33,6 +33,28 @@
     --radius-sm: 8px;
 }
 
+[data-theme="jobtoolz"] {
+    --bg: #F0F2F7;
+    --surface: #FFFFFF;
+    --surface2: #F5F5F8;
+    --surface3: #E4E7F0;
+    --accent: #47A83A;
+    --accent-dark: #3a9030;
+    --accent-glow: rgba(71, 168, 58, 0.12);
+    --red: #c0392b;
+    --red-dim: rgba(192, 57, 43, 0.10);
+    --yellow: #d4a010;
+    --text: #334076;
+    --text2: #5C6691;
+    --text3: #AFB9C4;
+    --border: #D6D9E4;
+    --border2: #C4C8D8;
+    --p0: #47A83A;
+    --p1: #334076;
+    --p2: #e07020;
+    --p3: #8855cc;
+}
+
 html, body {
     height: 100%;
     overflow: hidden;
@@ -72,6 +94,7 @@ html, body {
 }
 
 .home-header {
+    position: relative;
     background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
     padding: 32px 20px 24px;
     text-align: center;
@@ -94,6 +117,28 @@ html, body {
     font-size: 13px;
     color: var(--text2);
     margin-top: 4px;
+}
+
+.theme-toggle {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    transition: all 0.15s;
+}
+
+.theme-toggle:active {
+    opacity: 0.7;
 }
 
 .home-body {
@@ -927,13 +972,13 @@ html, body {
     align-items: center;
     justify-content: center;
     gap: 2px;
-    padding: 4px 4px;
+    padding: 3px 2px;
     background: var(--surface2);
     border: 2px solid var(--border);
     border-radius: var(--radius);
     cursor: pointer;
     transition: background 0.12s, border-color 0.12s;
-    min-height: 38px;
+    min-height: 32px;
 }
 
 .cricket-num-btn:active:not(:disabled) {
@@ -1010,18 +1055,18 @@ html, body {
 }
 
 .cricket-penalty-nums {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
 }
 
 .cricket-num-label {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 800;
     color: var(--text);
     line-height: 1;
 }
 
 .cricket-mark-sym {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 800;
     line-height: 1;
 }
@@ -1032,9 +1077,12 @@ html, body {
     gap: 8px;
 }
 
+.cricket-controls .undo-btn {
+    flex: 1;
+}
 
 .cricket-confirm-btn {
-    flex: 1;
+    flex: 3;
     padding: 10px;
     background: var(--accent);
     border: none;
